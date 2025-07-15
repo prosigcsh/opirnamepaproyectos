@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Dashboard de Megaproyectos</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <style>
+    body { font-family: Arial, sans-serif; margin: 0; }
+    #header {
+      background: #2c3e50; color: white; padding: 15px;
+      text-align: center; font-size: 20px; font-weight: bold;
+    }
+    #controls { margin: 10px; text-align: center; }
+    #map { height: 70vh; }
+    #legend {
+      background: white; padding: 10px; font-size: 12px;
+      line-height: 1.5em; border-radius: 5px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.3);
+      position: absolute; bottom: 90px; left: 10px; z-index: 1000;
+    }
+    .legend-item {
+      margin-bottom: 4px; display: flex; align-items: center;
+    }
+    .legend-color {
+      width: 14px; height: 14px; margin-right: 6px;
+      border-radius: 3px; display: inline-block;
+    }
+    #footer {
+      font-size: 12px; background: #f4f4f4;
+      padding: 10px; text-align: center;
+    }
+    #footer img {
+      height: 40px; vertical-align: middle; margin: 0 10px;
+    }
+    #footer a { color: #0066cc; text-decoration: none; }
+    #notaLegal {
+      font-size: 10px; text-align: right;
+      margin: 10px 20px; color: #444;
+    }
+    select {
+      margin-right: 10px; padding: 5px;
+    }
+    button {
+      padding: 6px 12px; background: #2c3e50;
+      color: white; border: none; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="plantillaPDF">
+    <div id="header">Megaproyectos y problemáticas socioambientales en México</div>
+    <div id="controls">
+      <select id="nombreSelect"><option value="">--Nombre--</option></select>
+      <select id="tipoSelect"><option value="">--Tipo--</option></select>
+      <select id="estadoSelect"><option value="">--Estado--</option></select>
+      <button onclick="descargarMapa()">Descargar mapa en PDF</button>
+    </div>
+    <div id="map"></div>
+    <div id="legend"></div>
+    <div id="footer">
+      <img src="logo-ciesas.png" alt="Logo CIESAS" height="40">
+      <img src="logotipo-prosig-csh.png" alt="Logo ProSIG-CSH" height="40">
+      <img src="logotipo-opirna.png" alt="Logo OPIRNA" height="40"><br>
+      Centro de Investigaciones y Estudios Superiores en Antropología Social (CIESAS) · ProSIG-CSH · OPIRNA<br>
+      <a href="https://opirna.ciesas.edu.mx/" target="_blank">https://opirna.ciesas.edu.mx/</a>
+    </div>
+    <div id="notaLegal">
+      Este mapa fue generado con información del OPIRNA del ProSIG-CSH del CIESAS.<br>
+      El uso de este material con fines académicos, educativos o informativos está permitido citando la fuente.
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+  <script>
+    const map = L.map('map', { preferCanvas: true }).setView([23.5, -102], 5);
+
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap'
+    });
+
+    const satelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles © Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye'
+    });
+
+    osm.addTo(map);
+
+    const baseMaps = {
+      "Mapa estándar": osm,
+      "Satélite (Esri)": satelite
+    };
+
+    L.control.layers(baseMaps, null, { position: 'topleft' }).addTo(map);
+
+    const colorPorTipo = {
+      "Deforestación": "darkolivegreen",
+      "Desarrollo turístico": "green",
+      "Desarrollo urbano municipal": "darkgreen",
+      "Energía solar": "gold",
+      "Energía solar (megaproyecto)": "orange",
+      "Eólico": "lightblue",
+      "Exportación de gas natural licuado (GNL)": "darkorange",
+      "Fracking": "red",
+      "Gasoducto": "brown",
+      "Gasoducto y termoeléctrica": "darkred",
+      "Hidroeléctrico": "teal",
+      "Industrial / Portuario": "gray",
+      "Infraestructura aeroportuaria / urbana": "purple",
+      "Infraestructura ferroviaria": "navy",
+      "Infraestructura hidráulica": "blue",
+      "Infraestructura vial": "black",
+      "Minería": "darkgoldenrod",
+      "Parque Eólico": "lightskyblue",
+      "Producción industrial porcícola": "pink",
+      "Termoeléctrica": "maroon"
+    };
+
+    const legend = document.getElementById('legend');
+
+    let proyectoLayer;
+    let proyectos = [];
+
+    fetch('megaproyectos2.geojson')
+      .then(res => res.json())
+      .then(data => {
+        proyectos = data.features;
+        const nombres = new Set(), tipos = new Set(), estados = new Set();
+        proyectos.forEach(f => {
+          nombres.add(f.properties.Nombre);
+          tipos.add(f.properties.Tipo);
+          estados.add(f.properties.Estado);
+        });
+        nombres.forEach(n => addOption('nombreSelect', n));
+        tipos.forEach(t => addOption('tipoSelect', t));
+        estados.forEach(e => addOption('estadoSelect', e));
+        generarLeyenda(Array.from(tipos));  // ← Aquí se genera leyenda con tipos presentes
+        mostrarProyectos(proyectos);
+      });
+
+    function addOption(selectId, value) {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = value;
+      document.getElementById(selectId).appendChild(option);
+    }
+
+    function generarLeyenda(tiposPresentes) {
+      legend.innerHTML = '';
+      for (const tipo in colorPorTipo) {
+        const color = tiposPresentes.includes(tipo) ? colorPorTipo[tipo] : '#cccccc'; // gris claro si no hay datos
+        const div = document.createElement('div');
+        div.className = 'legend-item';
+        div.innerHTML = `<span class="legend-color" style="background:${color}"></span>${tipo}`;
+        legend.appendChild(div);
+      }
+    }
+
+    function mostrarProyectos(lista) {
+      if (proyectoLayer) proyectoLayer.remove();
+      proyectoLayer = L.geoJSON(lista, {
+        pointToLayer: function (feature, latlng) {
+          const tipo = feature.properties.Tipo;
+          return L.circleMarker(latlng, {
+            radius: 6,
+            fillColor: colorPorTipo[tipo] || '#cccccc',  // gris claro si tipo no registrado
+            color: '#000',
+            weight: 1,
+            opacity: 1,
+            fillOpacity: 0.8
+          });
+        },
+        onEachFeature: function (feature, layer) {
+          const p = feature.properties;
+          layer.bindPopup(`
+            <b>${p.Nombre}</b><br>
+            Tipo: ${p.Tipo}<br>
+            Estado: ${p.Estado}<br>
+            Municipio: ${p.Municipio}<br>
+            Consulta Indígena: ${p.Consulta_Indigena}<br>
+            Más información: <a href="${p.Información}" target="_blank">Ver fuente</a>
+          `);
+        }
+      }).addTo(map);
+      if (lista.length > 0) {
+        map.fitBounds(proyectoLayer.getBounds());
+      }
+    }
+
+    function filtrarProyectos() {
+      const nombre = document.getElementById('nombreSelect').value;
+      const tipo = document.getElementById('tipoSelect').value;
+      const estado = document.getElementById('estadoSelect').value;
+      const filtrados = proyectos.filter(f => {
+        const p = f.properties;
+        return (!nombre || p.Nombre === nombre) &&
+               (!tipo || p.Tipo === tipo) &&
+               (!estado || p.Estado === estado);
+      });
+      mostrarProyectos(filtrados);
+    }
+
+    document.getElementById('nombreSelect').addEventListener('change', filtrarProyectos);
+    document.getElementById('tipoSelect').addEventListener('change', filtrarProyectos);
+    document.getElementById('estadoSelect').addEventListener('change', filtrarProyectos);
+
+    function descargarMapa() {
+      const contenedor = document.getElementById('plantillaPDF');
+      map.invalidateSize();
+      html2canvas(contenedor, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 2
+      }).then(canvas => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jspdf.jsPDF('landscape', 'pt', [canvas.width, canvas.height]);
+        pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save('mapa_megaproyectos.pdf');
+      });
+    }
+  </script>
+</body>
+</html>
