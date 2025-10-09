@@ -66,65 +66,97 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
-    // --- Mapa base ---
+    // ----- MAPA -----
     const map = L.map('map', { preferCanvas: true }).setView([23.5, -102], 5);
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
-    const satelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles © Esri'
-    });
+    const satelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri' });
     L.control.layers({ "Mapa estándar": osm, "Satélite (Esri)": satelite }, null, { position: 'topleft' }).addTo(map);
 
-    // --- Colores claros por tipo ---
+    // ----- TIPOS (los 16 de tu lista) y COLORES CLAROS Y DISTINTOS -----
+    const ordenTipos = [
+      "Deforestación",
+      "Desarrollo turístico",
+      "Energía solar",
+      "Eólico",
+      "Fracking",
+      "Gasoducto",
+      "Hidroeléctrico",
+      "Infraestructura aeroportuaria / urbana",
+      "Infraestructura ferroviaria",
+      "Infraestructura hidráulica",
+      "Infraestructura marítima",
+      "Infraestructura vial",
+      "Minería",
+      "Producción industrial porcícola",
+      "Siderurgia",
+      "Termoeléctrica"
+    ];
+
     const colorPorTipo = {
-      "Deforestación": "#c7e9c0",
-      "Desarrollo turístico": "#bde0fe",
-      "Desarrollo urbano municipal": "#d7e3fc",
-      "Energía solar": "#fff3b0",
-      "Energía solar (megaproyecto)": "#ffe09a",
-      "Eólico": "#cfe8ff",
-      "Exportación de gas natural licuado (GNL)": "#ffd6a5",
-      "Fracking": "#ffc9de",
-      "Gasoducto": "#ffe4c4",
-      "Gasoducto y termoeléctrica": "#ffd2c2",
-      "Hidroeléctrico": "#c4f1f9",
-      "Industrial / Portuario": "#e5e7eb",
-      "Infraestructura aeroportuaria / urbana": "#e9d5ff",
-      "Infraestructura ferroviaria": "#dbeafe",
-      "Infraestructura hidráulica": "#bae6fd",
-      "Infraestructura vial": "#f3e8ff",
-      "Minería": "#fde68a",
-      "Parque Eólico": "#e0f2fe",
-      "Producción industrial porcícola": "#ffe4ef",
-      "Termoeléctrica": "#ffd7ba"
+      "Deforestación": "#9BD77A",                     // verde claro
+      "Desarrollo turístico": "#FFD166",              // amarillo cálido
+      "Energía solar": "#F6D365",                     // ámbar claro
+      "Eólico": "#73C2FB",                            // azul cielo
+      "Fracking": "#FF9AA2",                          // rosa/rojo suave
+      "Gasoducto": "#FAB995",                         // durazno
+      "Hidroeléctrico": "#80E1D1",                    // aqua/mint
+      "Infraestructura aeroportuaria / urbana": "#BDB2FF", // lavanda
+      "Infraestructura ferroviaria": "#A3D3FF",       // azul pastel
+      "Infraestructura hidráulica": "#A7F3D0",        // verde menta
+      "Infraestructura marítima": "#8ECAE6",          // azul mar
+      "Infraestructura vial": "#FBCFE8",              // rosa pastel
+      "Minería": "#F5DF8F",                           // amarillo pálido
+      "Producción industrial porcícola": "#C6F1A2",   // lima claro
+      "Siderurgia": "#D1D5DB",                        // gris claro
+      "Termoeléctrica": "#F7B2A1"                     // salmón
     };
+
+    // Normaliza nombres antiguos del GeoJSON a los 16 tipos actuales
+    function normalizarTipo(tRaw){
+      const t = (tRaw || "").trim();
+      const m = {
+        "Parque Eólico": "Eólico",
+        "Energía solar (megaproyecto)": "Energía solar",
+        "Exportación de gas natural licuado (GNL)": "Infraestructura marítima",
+        "Industrial / Portuario": "Infraestructura marítima",
+        "Infraestructura aeroportuaria/urbana": "Infraestructura aeroportuaria / urbana",
+        "Infraestructura aeroportuaria": "Infraestructura aeroportuaria / urbana",
+      };
+      return m[t] || t;
+    }
 
     const legend = document.getElementById('legend');
     let proyectoLayer, proyectos = [];
 
-    // --- Carga del GeoJSON (mismo directorio) ---
+    // ----- CARGA DEL GEOJSON -----
     fetch('megaproyectos2.geojson')
       .then(res => res.json())
       .then(data => {
-        proyectos = data.features || [];
-        const nombres = new Set(), tipos = new Set(), estados = new Set();
+        proyectos = (data.features || []).map(f => {
+          f._tipoNorm = normalizarTipo(f.properties?.Tipo);
+          return f;
+        });
 
+        // Poblar selects con datos normalizados
+        const nombres = new Set(), tipos = new Set(), estados = new Set();
         proyectos.forEach(f => {
           const p = f.properties || {};
           if (p.Nombre) nombres.add(p.Nombre);
-          if (p.Tipo) tipos.add(p.Tipo);
+          if (f._tipoNorm) tipos.add(f._tipoNorm);
           if (p.Estado) estados.add(p.Estado);
         });
 
         [...nombres].sort().forEach(v => addOption('nombreSelect', v));
-        [...tipos].sort().forEach(v => addOption('tipoSelect', v));
+        // Mostrar tipos en el orden definido por "ordenTipos"
+        ordenTipos.forEach(t => { if (tipos.has(t)) addOption('tipoSelect', t); });
         [...estados].sort().forEach(v => addOption('estadoSelect', v));
 
-        generarLeyenda([...tipos].sort());
+        generarLeyenda(ordenTipos.filter(t => tipos.has(t)));
         mostrarProyectos(proyectos);
       })
       .catch(err => console.error('Error al cargar el GeoJSON:', err));
 
-    // --- Utilidades UI ---
+    // ----- UI helpers -----
     function addOption(selectId, value){
       const o = document.createElement('option');
       o.value = value; o.textContent = value;
@@ -133,21 +165,20 @@
 
     function generarLeyenda(tiposPresentes){
       legend.innerHTML = '<strong>Leyenda</strong><br>';
-      const ordenados = Object.keys(colorPorTipo).sort();
-      for(const tipo of ordenados){
+      ordenTipos.forEach(tipo => {
         const color = tiposPresentes.includes(tipo) ? colorPorTipo[tipo] : '#f3f4f6';
         const div = document.createElement('div');
         div.className = 'legend-item';
         div.innerHTML = `<span class="legend-color" style="background:${color}"></span>${tipo}`;
         legend.appendChild(div);
-      }
+      });
     }
 
-    function popupMinimo(p){
+    function popupMinimo(p, tipoN){
       return `
         <div class="popup-mini">
           <span class="name">${p.Nombre || 'Sin nombre'}</span>
-          <span class="tipo">Tipo: ${p.Tipo || 'N/D'}</span>
+          <span class="tipo">Tipo: ${tipoN || 'N/D'}</span>
           <a href="#" class="ver-meta">Ver metadatos</a>
         </div>`;
     }
@@ -157,21 +188,26 @@
 
       proyectoLayer = L.geoJSON(lista, {
         pointToLayer: (feature, latlng) => {
-          const tipo = (feature.properties && feature.properties.Tipo) || '';
+          const tipoN = feature._tipoNorm || '';
           return L.circleMarker(latlng, {
-            radius: 7, fillColor: colorPorTipo[tipo] || '#e5e7eb',
-            color: '#111827', weight: 0.6, opacity: 1, fillOpacity: 0.9
+            radius: 7,
+            fillColor: colorPorTipo[tipoN] || '#e5e7eb',
+            color: '#111827',
+            weight: 0.6,
+            opacity: 1,
+            fillOpacity: 0.9
           });
         },
         onEachFeature: (feature, layer) => {
           const p = feature.properties || {};
-          layer.bindPopup(popupMinimo(p));
+          const tipoN = feature._tipoNorm || p.Tipo || '';
+          layer.bindPopup(popupMinimo(p, tipoN));
           layer.on('popupopen', (e) => {
             const link = e.popup.getElement().querySelector('.ver-meta');
             if(link){
               link.addEventListener('click', (ev) => {
                 ev.preventDefault();
-                abrirMetadatos(p);
+                abrirMetadatos(p, tipoN);
               });
             }
           });
@@ -185,13 +221,13 @@
 
     function filtrarProyectos(){
       const nombre = document.getElementById('nombreSelect').value;
-      const tipo = document.getElementById('tipoSelect').value;
+      const tipo = document.getElementById('tipoSelect').value;      // ya normalizado
       const estado = document.getElementById('estadoSelect').value;
 
       const filtrados = proyectos.filter(f => {
         const p = f.properties || {};
         return (!nombre || p.Nombre === nombre) &&
-               (!tipo || p.Tipo === tipo) &&
+               (!tipo || f._tipoNorm === tipo) &&
                (!estado || p.Estado === estado);
       });
       mostrarProyectos(filtrados);
@@ -200,8 +236,8 @@
     document.getElementById('tipoSelect').addEventListener('change', filtrarProyectos);
     document.getElementById('estadoSelect').addEventListener('change', filtrarProyectos);
 
-    // --- Interfaz de metadatos (otra pestaña) ---
-    function abrirMetadatos(p){
+    // ----- METADATOS (nueva pestaña) -----
+    function abrirMetadatos(p, tipoN){
       const safe = (v)=> (v===null||v===undefined||v==="") ? "—" : String(v);
       const entries = Object.keys(p).sort().map(k => {
         const v = p[k];
@@ -235,7 +271,7 @@
           <main>
             <div class="card">
               <h1 class="title">${safe(p.Nombre)}</h1>
-              <p class="subtitle">Tipo: <strong>${safe(p.Tipo)}</strong>${p.Estado ? " · Estado: "+safe(p.Estado) : ""}</p>
+              <p class="subtitle">Tipo: <strong>${safe(tipoN)}</strong>${p.Estado ? " · Estado: "+safe(p.Estado) : ""}</p>
               ${entries}
             </div>
             <footer>Fuente: OPIRNA · ProSIG-CSH · CIESAS</footer>
@@ -246,7 +282,7 @@
       w.document.open(); w.document.write(html); w.document.close();
     }
 
-    // --- Exportar a PDF ---
+    // ----- Exportar a PDF -----
     function descargarMapa(){
       const contenedor = document.getElementById('plantillaPDF');
       map.invalidateSize();
