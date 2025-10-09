@@ -7,81 +7,54 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
     :root{
-      --bg:#ffffff;
-      --ink:#1f2937;
-      --muted:#6b7280;
-      --brand:#2c3e50;
-      --card:#f8fafc;
-      --chip:#eef2ff;
-      --shadow:0 2px 10px rgba(0,0,0,.08);
+      --bg:#ffffff; --ink:#1f2937; --muted:#6b7280; --brand:#2c3e50;
+      --card:#f8fafc; --shadow:0 2px 10px rgba(0,0,0,.08);
     }
-    body { font-family: Arial, sans-serif; margin: 0; color:var(--ink); background:var(--bg);}
-    #header {
-      background: var(--brand); color: white; padding: 16px 12px;
-      text-align: center; font-size: 20px; font-weight: bold;
+    body{font-family:Arial, sans-serif; margin:0; color:var(--ink); background:var(--bg);}
+    #header{background:var(--brand); color:#fff; padding:16px 12px; text-align:center; font-size:20px; font-weight:bold;}
+    #controls{margin:10px; text-align:center;}
+    #controls select{margin:0 6px 6px; padding:6px 8px; border:1px solid #e5e7eb; border-radius:8px; background:#fff;}
+    #controls button{padding:8px 14px; background:var(--brand); color:#fff; border:none; cursor:pointer; border-radius:8px; box-shadow:var(--shadow);}
+    #map{height:70vh;}
+    #legend{
+      background:#fff; padding:10px; font-size:12px; line-height:1.5em; border-radius:8px;
+      box-shadow:var(--shadow); position:absolute; bottom:98px; left:10px; z-index:1000; max-width:260px;
     }
-    #controls { margin: 10px; text-align: center; }
-    #controls select{ margin: 0 6px 6px; padding: 6px 8px; border:1px solid #e5e7eb; border-radius:8px; background:#fff;}
-    #controls button {
-      padding: 8px 14px; background: var(--brand);
-      color: white; border: none; cursor: pointer; border-radius:8px;
-      box-shadow: var(--shadow);
-    }
-    #map { height: 70vh; }
-    #legend {
-      background: white; padding: 10px; font-size: 12px;
-      line-height: 1.5em; border-radius: 8px;
-      box-shadow: var(--shadow);
-      position: absolute; bottom: 98px; left: 10px; z-index: 1000;
-      max-width: 240px;
-    }
-    .legend-item {
-      margin-bottom: 6px; display: flex; align-items: center; gap:6px;
-    }
-    .legend-color {
-      width: 14px; height: 14px;
-      border-radius: 3px; display: inline-block; border:1px solid rgba(0,0,0,.15);
-    }
-    #footer {
-      font-size: 12px; background: #f4f4f4;
-      padding: 12px; text-align: center;
-      border-top: 1px solid #e5e7eb;
-    }
-    #footer img {
-      height: 40px; vertical-align: middle; margin: 0 10px;
-    }
-    #footer a { color: #0066cc; text-decoration: none; }
-    #notaLegal {
-      font-size: 10px; text-align: right;
-      margin: 10px 20px; color: #444;
-    }
-    .popup-mini{
-      font-size:13px; line-height:1.35;
-    }
-    .popup-mini .name{ font-weight:bold; display:block; margin-bottom:4px;}
-    .popup-mini .tipo{ color:var(--muted); margin-bottom:6px; display:block;}
-    .popup-mini a{ color:#0b63c8; text-decoration:none; font-weight:bold;}
+    .legend-item{margin-bottom:6px; display:flex; align-items:center; gap:6px;}
+    .legend-color{width:14px; height:14px; border-radius:3px; border:1px solid rgba(0,0,0,.15);}
+    #footer{font-size:12px; background:#f4f4f4; padding:12px; text-align:center; border-top:1px solid #e5e7eb;}
+    #footer img{height:40px; vertical-align:middle; margin:0 10px;}
+    #footer a{color:#0b63c8; text-decoration:none;}
+    #notaLegal{font-size:10px; text-align:right; margin:10px 20px; color:#444;}
+    .popup-mini{font-size:13px; line-height:1.35;}
+    .popup-mini .name{font-weight:bold; display:block; margin-bottom:4px;}
+    .popup-mini .tipo{color:var(--muted); margin-bottom:6px; display:block;}
+    .popup-mini a{color:#0b63c8; text-decoration:none; font-weight:bold;}
   </style>
 </head>
 <body>
   <div id="plantillaPDF">
     <div id="header">Megaproyectos y problemáticas socioambientales en México</div>
+
     <div id="controls">
       <select id="nombreSelect"><option value="">--Nombre--</option></select>
       <select id="tipoSelect"><option value="">--Tipo--</option></select>
       <select id="estadoSelect"><option value="">--Estado--</option></select>
       <button onclick="descargarMapa()">Descargar mapa en PDF</button>
     </div>
+
     <div id="map"></div>
     <div id="legend"></div>
+
     <div id="footer">
-      <img src="logo-ciesas.png" alt="Logo CIESAS" height="40">
-      <img src="logotipo-prosig-csh.png" alt="Logo ProSIG-CSH" height="40">
-      <img src="logotipo-opirna.png" alt="Logo OPIRNA" height="40"><br>
+      <img src="logo-ciesas.png" alt="Logo CIESAS">
+      <img src="logotipo-prosig-csh.png" alt="Logo ProSIG-CSH">
+      <img src="logotipo-opirna.png" alt="Logo OPIRNA"><br>
       Centro de Investigaciones y Estudios Superiores en Antropología Social (CIESAS) · ProSIG-CSH · OPIRNA<br>
-      <a href="https://opirna.ciesas.edu.mx/" target="_blank">https://opirna.ciesas.edu.mx/</a><br>
+      <a href="https://opirna.ciesas.edu.mx/" target="_blank" rel="noopener">https://opirna.ciesas.edu.mx/</a><br>
       <strong>Elaborado y actualizado por: Carlos Alfredo Hernández Guillén, Vanesa Jaimes López y J. Antonio Bernal Hernández</strong>
     </div>
+
     <div id="notaLegal">
       Este mapa fue generado con información del OPIRNA del ProSIG-CSH del CIESAS.<br>
       El uso de este material con fines académicos, educativos o informativos está permitido citando la fuente.
@@ -93,4 +66,196 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
-    const map = L.map('map'
+    // --- Mapa base ---
+    const map = L.map('map', { preferCanvas: true }).setView([23.5, -102], 5);
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
+    const satelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Tiles © Esri'
+    });
+    L.control.layers({ "Mapa estándar": osm, "Satélite (Esri)": satelite }, null, { position: 'topleft' }).addTo(map);
+
+    // --- Colores claros por tipo ---
+    const colorPorTipo = {
+      "Deforestación": "#c7e9c0",
+      "Desarrollo turístico": "#bde0fe",
+      "Desarrollo urbano municipal": "#d7e3fc",
+      "Energía solar": "#fff3b0",
+      "Energía solar (megaproyecto)": "#ffe09a",
+      "Eólico": "#cfe8ff",
+      "Exportación de gas natural licuado (GNL)": "#ffd6a5",
+      "Fracking": "#ffc9de",
+      "Gasoducto": "#ffe4c4",
+      "Gasoducto y termoeléctrica": "#ffd2c2",
+      "Hidroeléctrico": "#c4f1f9",
+      "Industrial / Portuario": "#e5e7eb",
+      "Infraestructura aeroportuaria / urbana": "#e9d5ff",
+      "Infraestructura ferroviaria": "#dbeafe",
+      "Infraestructura hidráulica": "#bae6fd",
+      "Infraestructura vial": "#f3e8ff",
+      "Minería": "#fde68a",
+      "Parque Eólico": "#e0f2fe",
+      "Producción industrial porcícola": "#ffe4ef",
+      "Termoeléctrica": "#ffd7ba"
+    };
+
+    const legend = document.getElementById('legend');
+    let proyectoLayer, proyectos = [];
+
+    // --- Carga del GeoJSON (mismo directorio) ---
+    fetch('megaproyectos2.geojson')
+      .then(res => res.json())
+      .then(data => {
+        proyectos = data.features || [];
+        const nombres = new Set(), tipos = new Set(), estados = new Set();
+
+        proyectos.forEach(f => {
+          const p = f.properties || {};
+          if (p.Nombre) nombres.add(p.Nombre);
+          if (p.Tipo) tipos.add(p.Tipo);
+          if (p.Estado) estados.add(p.Estado);
+        });
+
+        [...nombres].sort().forEach(v => addOption('nombreSelect', v));
+        [...tipos].sort().forEach(v => addOption('tipoSelect', v));
+        [...estados].sort().forEach(v => addOption('estadoSelect', v));
+
+        generarLeyenda([...tipos].sort());
+        mostrarProyectos(proyectos);
+      })
+      .catch(err => console.error('Error al cargar el GeoJSON:', err));
+
+    // --- Utilidades UI ---
+    function addOption(selectId, value){
+      const o = document.createElement('option');
+      o.value = value; o.textContent = value;
+      document.getElementById(selectId).appendChild(o);
+    }
+
+    function generarLeyenda(tiposPresentes){
+      legend.innerHTML = '<strong>Leyenda</strong><br>';
+      const ordenados = Object.keys(colorPorTipo).sort();
+      for(const tipo of ordenados){
+        const color = tiposPresentes.includes(tipo) ? colorPorTipo[tipo] : '#f3f4f6';
+        const div = document.createElement('div');
+        div.className = 'legend-item';
+        div.innerHTML = `<span class="legend-color" style="background:${color}"></span>${tipo}`;
+        legend.appendChild(div);
+      }
+    }
+
+    function popupMinimo(p){
+      return `
+        <div class="popup-mini">
+          <span class="name">${p.Nombre || 'Sin nombre'}</span>
+          <span class="tipo">Tipo: ${p.Tipo || 'N/D'}</span>
+          <a href="#" class="ver-meta">Ver metadatos</a>
+        </div>`;
+    }
+
+    function mostrarProyectos(lista){
+      if(proyectoLayer) proyectoLayer.remove();
+
+      proyectoLayer = L.geoJSON(lista, {
+        pointToLayer: (feature, latlng) => {
+          const tipo = (feature.properties && feature.properties.Tipo) || '';
+          return L.circleMarker(latlng, {
+            radius: 7, fillColor: colorPorTipo[tipo] || '#e5e7eb',
+            color: '#111827', weight: 0.6, opacity: 1, fillOpacity: 0.9
+          });
+        },
+        onEachFeature: (feature, layer) => {
+          const p = feature.properties || {};
+          layer.bindPopup(popupMinimo(p));
+          layer.on('popupopen', (e) => {
+            const link = e.popup.getElement().querySelector('.ver-meta');
+            if(link){
+              link.addEventListener('click', (ev) => {
+                ev.preventDefault();
+                abrirMetadatos(p);
+              });
+            }
+          });
+        }
+      }).addTo(map);
+
+      if(lista.length && proyectoLayer.getLayers().length){
+        map.fitBounds(proyectoLayer.getBounds().pad(0.1));
+      }
+    }
+
+    function filtrarProyectos(){
+      const nombre = document.getElementById('nombreSelect').value;
+      const tipo = document.getElementById('tipoSelect').value;
+      const estado = document.getElementById('estadoSelect').value;
+
+      const filtrados = proyectos.filter(f => {
+        const p = f.properties || {};
+        return (!nombre || p.Nombre === nombre) &&
+               (!tipo || p.Tipo === tipo) &&
+               (!estado || p.Estado === estado);
+      });
+      mostrarProyectos(filtrados);
+    }
+    document.getElementById('nombreSelect').addEventListener('change', filtrarProyectos);
+    document.getElementById('tipoSelect').addEventListener('change', filtrarProyectos);
+    document.getElementById('estadoSelect').addEventListener('change', filtrarProyectos);
+
+    // --- Interfaz de metadatos (otra pestaña) ---
+    function abrirMetadatos(p){
+      const safe = (v)=> (v===null||v===undefined||v==="") ? "—" : String(v);
+      const entries = Object.keys(p).sort().map(k => {
+        const v = p[k];
+        const val = (typeof v === 'string' && /^https?:\/\//i.test(v))
+          ? `<a href="${v}" target="_blank" rel="noopener">${v}</a>` : safe(v);
+        return `<div class="row"><div class="k">${k}</div><div class="v">${val}</div></div>`;
+      }).join("");
+
+      const html = `
+      <html lang="es">
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Metadatos · ${safe(p.Nombre)}</title>
+          <style>
+            :root{--bg:#f8fafc;--card:#fff;--ink:#0f172a;--muted:#475569;--brand:#2c3e50;}
+            body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--ink);}
+            header{background:var(--brand);color:#fff;padding:14px 16px;font-weight:bold;}
+            main{max-width:900px;margin:24px auto;padding:0 12px;}
+            .card{background:var(--card);border-radius:14px;box-shadow:0 5px 20px rgba(0,0,0,.1);padding:18px;}
+            .title{font-size:20px;margin:0 0 6px;}
+            .subtitle{color:var(--muted);margin:0 0 16px;}
+            .row{display:grid;grid-template-columns:220px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid #e5e7eb;}
+            .k{font-weight:bold;color:#374151;}
+            .v a{color:#0b63c8;text-decoration:none;word-break:break-all;}
+            footer{font-size:12px;color:#64748b;text-align:center;margin:18px 0;}
+          </style>
+        </head>
+        <body>
+          <header>Metadatos del proyecto</header>
+          <main>
+            <div class="card">
+              <h1 class="title">${safe(p.Nombre)}</h1>
+              <p class="subtitle">Tipo: <strong>${safe(p.Tipo)}</strong>${p.Estado ? " · Estado: "+safe(p.Estado) : ""}</p>
+              ${entries}
+            </div>
+            <footer>Fuente: OPIRNA · ProSIG-CSH · CIESAS</footer>
+          </main>
+        </body>
+      </html>`;
+      const w = window.open('', '_blank');
+      w.document.open(); w.document.write(html); w.document.close();
+    }
+
+    // --- Exportar a PDF ---
+    function descargarMapa(){
+      const contenedor = document.getElementById('plantillaPDF');
+      map.invalidateSize();
+      html2canvas(contenedor, { useCORS:true, allowTaint:true, scale:2 }).then(canvas => {
+        const pdf = new jspdf.jsPDF('landscape', 'pt', [canvas.width, canvas.height]);
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, canvas.width, canvas.height);
+        pdf.save('mapa_megaproyectos.pdf');
+      });
+    }
+  </script>
+</body>
+</html>
