@@ -18,10 +18,10 @@
     #map{height:70vh;}
     #legend{
       background:#fff; padding:10px; font-size:12px; line-height:1.5em; border-radius:8px;
-      box-shadow:var(--shadow); position:absolute; bottom:98px; left:10px; z-index:1000; max-width:260px;
+      box-shadow:var(--shadow); position:absolute; bottom:98px; left:10px; z-index:1000; max-width:280px;
     }
     .legend-item{margin-bottom:6px; display:flex; align-items:center; gap:6px;}
-    .legend-color{width:14px; height:14px; border-radius:3px; border:1px solid rgba(0,0,0,.15);}
+    .legend-swatch{width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center;}
     #footer{font-size:12px; background:#f4f4f4; padding:12px; text-align:center; border-top:1px solid #e5e7eb;}
     #footer img{height:40px; vertical-align:middle; margin:0 10px;}
     #footer a{color:#0b63c8; text-decoration:none;}
@@ -66,13 +66,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
-    // ----- MAPA -----
+    // ---------- MAPA ----------
     const map = L.map('map', { preferCanvas: true }).setView([23.5, -102], 5);
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(map);
     const satelite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Tiles © Esri' });
     L.control.layers({ "Mapa estándar": osm, "Satélite (Esri)": satelite }, null, { position: 'topleft' }).addTo(map);
 
-    // ----- TIPOS (los 16 de tu lista) y COLORES CLAROS Y DISTINTOS -----
+    // ---------- TIPOS (16) ----------
     const ordenTipos = [
       "Deforestación",
       "Desarrollo turístico",
@@ -92,26 +92,48 @@
       "Termoeléctrica"
     ];
 
+    // Colores claros (pastel) bien diferenciados
     const colorPorTipo = {
-      "Deforestación": "#9BD77A",                     // verde claro
-      "Desarrollo turístico": "#FFD166",              // amarillo cálido
-      "Energía solar": "#F6D365",                     // ámbar claro
-      "Eólico": "#73C2FB",                            // azul cielo
-      "Fracking": "#FF9AA2",                          // rosa/rojo suave
-      "Gasoducto": "#FAB995",                         // durazno
-      "Hidroeléctrico": "#80E1D1",                    // aqua/mint
-      "Infraestructura aeroportuaria / urbana": "#BDB2FF", // lavanda
-      "Infraestructura ferroviaria": "#A3D3FF",       // azul pastel
-      "Infraestructura hidráulica": "#A7F3D0",        // verde menta
-      "Infraestructura marítima": "#8ECAE6",          // azul mar
-      "Infraestructura vial": "#FBCFE8",              // rosa pastel
-      "Minería": "#F5DF8F",                           // amarillo pálido
-      "Producción industrial porcícola": "#C6F1A2",   // lima claro
-      "Siderurgia": "#D1D5DB",                        // gris claro
-      "Termoeléctrica": "#F7B2A1"                     // salmón
+      "Deforestación": "#9BD77A",
+      "Desarrollo turístico": "#FFD166",
+      "Energía solar": "#F6D365",
+      "Eólico": "#73C2FB",
+      "Fracking": "#FF9AA2",
+      "Gasoducto": "#FAB995",
+      "Hidroeléctrico": "#80E1D1",
+      "Infraestructura aeroportuaria / urbana": "#BDB2FF",
+      "Infraestructura ferroviaria": "#A3D3FF",
+      "Infraestructura hidráulica": "#A7F3D0",
+      "Infraestructura marítima": "#8ECAE6",
+      "Infraestructura vial": "#FBCFE8",
+      "Minería": "#F5DF8F",
+      "Producción industrial porcícola": "#C6F1A2",
+      "Siderurgia": "#D1D5DB",
+      "Termoeléctrica": "#F7B2A1"
     };
 
-    // Normaliza nombres antiguos del GeoJSON a los 16 tipos actuales
+    // Formas por tipo para evitar confusiones de color
+    // circle | square | diamond | triangleUp | triangleDown | hexagon
+    const formaPorTipo = {
+      "Deforestación": "circle",
+      "Desarrollo turístico": "square",
+      "Energía solar": "diamond",
+      "Eólico": "triangleUp",
+      "Fracking": "hexagon",
+      "Gasoducto": "triangleDown",
+      "Hidroeléctrico": "circle",
+      "Infraestructura aeroportuaria / urbana": "square",
+      "Infraestructura ferroviaria": "diamond",
+      "Infraestructura hidráulica": "triangleUp",
+      "Infraestructura marítima": "hexagon",
+      "Infraestructura vial": "triangleDown",
+      "Minería": "square",
+      "Producción industrial porcícola": "diamond",
+      "Siderurgia": "triangleUp",
+      "Termoeléctrica": "circle"
+    };
+
+    // Normaliza nombres antiguos a los 16 tipos anteriores
     function normalizarTipo(tRaw){
       const t = (tRaw || "").trim();
       const m = {
@@ -120,15 +142,36 @@
         "Exportación de gas natural licuado (GNL)": "Infraestructura marítima",
         "Industrial / Portuario": "Infraestructura marítima",
         "Infraestructura aeroportuaria/urbana": "Infraestructura aeroportuaria / urbana",
-        "Infraestructura aeroportuaria": "Infraestructura aeroportuaria / urbana",
+        "Infraestructura aeroportuaria": "Infraestructura aeroportuaria / urbana"
       };
       return m[t] || t;
+    }
+
+    // Genera un SVG para la forma y color dados
+    function svgShape(shape, color, size=24){
+      const s = size, st = `stroke="#111827" stroke-width="1.2" fill="${color}"`;
+      switch(shape){
+        case "circle":
+          return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" ${st}/></svg>`;
+        case "square":
+          return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="2" ${st}/></svg>`;
+        case "diamond":
+          return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><polygon points="12,3 21,12 12,21 3,12" ${st}/></svg>`;
+        case "triangleUp":
+          return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><polygon points="12,4 21,20 3,20" ${st}/></svg>`;
+        case "triangleDown":
+          return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><polygon points="3,4 21,4 12,20" ${st}/></svg>`;
+        case "hexagon":
+          return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><polygon points="12,3 20,8 20,16 12,21 4,16 4,8" ${st}/></svg>`;
+        default:
+          return `<svg width="${s}" height="${s}" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" ${st}/></svg>`;
+      }
     }
 
     const legend = document.getElementById('legend');
     let proyectoLayer, proyectos = [];
 
-    // ----- CARGA DEL GEOJSON -----
+    // ---------- CARGA DEL GEOJSON ----------
     fetch('megaproyectos2.geojson')
       .then(res => res.json())
       .then(data => {
@@ -147,7 +190,6 @@
         });
 
         [...nombres].sort().forEach(v => addOption('nombreSelect', v));
-        // Mostrar tipos en el orden definido por "ordenTipos"
         ordenTipos.forEach(t => { if (tipos.has(t)) addOption('tipoSelect', t); });
         [...estados].sort().forEach(v => addOption('estadoSelect', v));
 
@@ -156,7 +198,7 @@
       })
       .catch(err => console.error('Error al cargar el GeoJSON:', err));
 
-    // ----- UI helpers -----
+    // ---------- UI ----------
     function addOption(selectId, value){
       const o = document.createElement('option');
       o.value = value; o.textContent = value;
@@ -167,9 +209,11 @@
       legend.innerHTML = '<strong>Leyenda</strong><br>';
       ordenTipos.forEach(tipo => {
         const color = tiposPresentes.includes(tipo) ? colorPorTipo[tipo] : '#f3f4f6';
+        const shape = formaPorTipo[tipo] || 'circle';
+        const swatch = svgShape(shape, color, 18);
         const div = document.createElement('div');
         div.className = 'legend-item';
-        div.innerHTML = `<span class="legend-color" style="background:${color}"></span>${tipo}`;
+        div.innerHTML = `<span class="legend-swatch">${swatch}</span>${tipo}`;
         legend.appendChild(div);
       });
     }
@@ -189,14 +233,16 @@
       proyectoLayer = L.geoJSON(lista, {
         pointToLayer: (feature, latlng) => {
           const tipoN = feature._tipoNorm || '';
-          return L.circleMarker(latlng, {
-            radius: 7,
-            fillColor: colorPorTipo[tipoN] || '#e5e7eb',
-            color: '#111827',
-            weight: 0.6,
-            opacity: 1,
-            fillOpacity: 0.9
+          const color = colorPorTipo[tipoN] || '#e5e7eb';
+          const shape = formaPorTipo[tipoN] || 'circle';
+
+          const icon = L.divIcon({
+            className: 'shape-marker',
+            html: svgShape(shape, color, 22),
+            iconSize: [22,22],
+            iconAnchor: [11,11]
           });
+          return L.marker(latlng, { icon });
         },
         onEachFeature: (feature, layer) => {
           const p = feature.properties || {};
@@ -221,7 +267,7 @@
 
     function filtrarProyectos(){
       const nombre = document.getElementById('nombreSelect').value;
-      const tipo = document.getElementById('tipoSelect').value;      // ya normalizado
+      const tipo = document.getElementById('tipoSelect').value;
       const estado = document.getElementById('estadoSelect').value;
 
       const filtrados = proyectos.filter(f => {
@@ -236,7 +282,7 @@
     document.getElementById('tipoSelect').addEventListener('change', filtrarProyectos);
     document.getElementById('estadoSelect').addEventListener('change', filtrarProyectos);
 
-    // ----- METADATOS (nueva pestaña) -----
+    // ---------- METADATOS (nueva pestaña) ----------
     function abrirMetadatos(p, tipoN){
       const safe = (v)=> (v===null||v===undefined||v==="") ? "—" : String(v);
       const entries = Object.keys(p).sort().map(k => {
@@ -282,7 +328,7 @@
       w.document.open(); w.document.write(html); w.document.close();
     }
 
-    // ----- Exportar a PDF -----
+    // ---------- Exportar a PDF ----------
     function descargarMapa(){
       const contenedor = document.getElementById('plantillaPDF');
       map.invalidateSize();
