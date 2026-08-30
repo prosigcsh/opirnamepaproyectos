@@ -35,11 +35,13 @@
     #legend{position:absolute;left:auto;right:14px;bottom:24px;z-index:500;width:245px;max-height:46vh;overflow:auto;padding:12px 13px;border:1px solid rgba(255,255,255,.8);border-radius:14px;background:rgba(255,253,247,.94);box-shadow:var(--shadow);font-size:10px;backdrop-filter:blur(14px)}#legend>strong{display:block;margin-bottom:9px;font-size:11px;text-transform:uppercase;letter-spacing:.1em}.legend-item{margin:5px 0;display:flex;align-items:center;gap:7px;color:#49534f}.legend-swatch{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
     #footer,#notaLegal{display:none}.leaflet-control-zoom a,.leaflet-control-layers{border-color:#d6dbd4!important;box-shadow:0 8px 22px rgba(21,33,29,.12)!important}.leaflet-popup-content-wrapper{border-radius:14px;box-shadow:var(--shadow)}.leaflet-popup-content{margin:16px}.popup-mini{min-width:220px;font-size:12px}.popup-mini .name{display:block;font-family:'Newsreader',serif;font-size:18px;line-height:1.15}.popup-mini .tipo{display:block;margin:6px 0 11px;color:var(--muted)}.popup-mini a{display:inline-block;padding:8px 11px;border-radius:9px;background:var(--forest);color:white;text-decoration:none;font-weight:700}
     #detailModal{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:flex-end;background:rgba(8,20,16,.48);backdrop-filter:blur(4px)}#detailModal.open{display:flex}.detail-panel{width:min(610px,100%);height:100%;display:flex;flex-direction:column;background:var(--card);box-shadow:-25px 0 70px rgba(8,20,16,.25);animation:slideIn .25s ease}.detail-head{padding:26px 28px 20px;background:var(--forest);color:white}.detail-kicker{color:var(--lime);font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:700}.detail-head h2{margin:8px 45px 6px 0;font-family:'Newsreader',serif;font-size:32px;line-height:1.05}.detail-sub{color:#bdd0c9;font-size:13px}.detail-close{position:absolute;top:20px;right:20px;width:38px;height:38px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:rgba(255,255,255,.1);color:white;font-size:22px;cursor:pointer}.detail-body{overflow:auto;padding:20px 28px 34px}.detail-row{display:grid;grid-template-columns:160px 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--line)}.detail-key{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em}.detail-value{font-size:13px;line-height:1.5;overflow-wrap:anywhere}.detail-value a{color:var(--forest2);font-weight:700}
+    #creditsModal{position:fixed;inset:0;z-index:3100;display:none;place-items:center;padding:20px;background:rgba(8,20,16,.58);backdrop-filter:blur(6px)}#creditsModal.open{display:grid}.credits-panel{position:relative;width:min(720px,100%);max-height:90vh;overflow:auto;border:1px solid rgba(255,255,255,.5);border-radius:22px;background:var(--card);box-shadow:0 35px 90px rgba(8,20,16,.35);animation:creditsIn .24s ease}.credits-top{padding:27px 30px 22px;background:var(--forest);color:white}.credits-top .detail-kicker{margin-bottom:7px}.credits-top h2{margin:0;font-family:'Newsreader',serif;font-size:34px}.credits-top p{margin:7px 50px 0 0;color:#bdd0c9;font-size:13px;line-height:1.5}.credits-content{padding:25px 30px 30px}.logo-links{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:25px}.logo-link{min-height:90px;display:flex;align-items:center;justify-content:center;padding:14px;border:1px solid var(--line);border-radius:14px;background:white;transition:.18s}.logo-link:hover{transform:translateY(-2px);border-color:#aab7ae;box-shadow:0 9px 24px rgba(21,33,29,.09)}.logo-link img{display:block;max-width:100%;height:52px;object-fit:contain}.credit-list{display:grid;gap:10px}.credit-item{display:grid;grid-template-columns:210px 1fr;gap:18px;padding:14px 0;border-top:1px solid var(--line)}.credit-role{color:var(--muted);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.credit-names{font-size:14px;line-height:1.55}.institution-link{display:inline-block;margin-top:20px;color:var(--forest2);font-size:12px;font-weight:700;text-decoration:none}.institution-link:hover{text-decoration:underline}@keyframes creditsIn{from{transform:translateY(14px) scale(.985);opacity:.5}}
+    .logo-fallback{display:none;color:var(--forest);font-family:'Newsreader',serif;font-size:20px;font-weight:700}
     #toast{position:fixed;left:50%;bottom:24px;z-index:4000;transform:translate(-50%,20px);padding:11px 16px;border-radius:10px;background:#17241f;color:white;font-size:12px;opacity:0;pointer-events:none;transition:.2s}#toast.show{opacity:1;transform:translate(-50%,0)}
     .loading-state{position:absolute;inset:0;z-index:800;display:grid;place-items:center;background:rgba(244,241,232,.83);backdrop-filter:blur(3px)}.loading-card{text-align:center;padding:22px 28px;border-radius:16px;background:white;box-shadow:var(--shadow)}.pulse{width:32px;height:32px;margin:0 auto 12px;border-radius:50%;background:var(--lime);animation:pulse 1.2s infinite}.loading-card small{color:var(--muted)}
     @keyframes pulse{50%{transform:scale(.68);opacity:.5}}@keyframes slideIn{from{transform:translateX(30px);opacity:.5}}
     @media(max-width:840px){body{overflow:auto}#plantillaPDF{height:auto;min-height:100vh}.workspace{grid-template-columns:1fr;grid-template-rows:auto 64vh}#sidebar{max-height:46vh}.brand-sub{display:none}.header-actions .ghost-btn{display:none}.map-intro{top:10px;right:10px;width:calc(100% - 70px);padding:11px 13px}.map-intro strong{font-size:17px}#legend{display:none}.detail-row{grid-template-columns:1fr;gap:4px}.summary{display:none}}
-    @media(max-width:540px){#header{padding:12px 14px}.brand-mark{width:40px;height:40px}.brand-title{font-size:22px}.header-actions{gap:5px}.primary-btn{padding:9px 11px;font-size:11px}.workspace{grid-template-rows:auto 58vh}.filter-grid{grid-template-columns:1fr}.detail-head,.detail-body{padding-left:20px;padding-right:20px}.detail-head h2{font-size:27px}}
+    @media(max-width:540px){#header{padding:12px 14px}.brand-mark{width:40px;height:40px}.brand-title{font-size:22px}.header-actions{gap:5px}.header-actions .credits-trigger{font-size:0;padding:9px}.header-actions .credits-trigger::after{content:'ⓘ';font-size:16px}.primary-btn{padding:9px 11px;font-size:11px}.workspace{grid-template-rows:auto 58vh}.filter-grid{grid-template-columns:1fr}.detail-head,.detail-body{padding-left:20px;padding-right:20px}.detail-head h2{font-size:27px}.credits-top,.credits-content{padding-left:20px;padding-right:20px}.logo-links{grid-template-columns:1fr}.logo-link{min-height:72px}.credit-item{grid-template-columns:1fr;gap:5px}}
     @media print{body{overflow:visible}.workspace{grid-template-columns:1fr}#sidebar,.header-actions,.map-intro{display:none}.map-shell,#map{position:relative;height:70vh}#footer{display:block}}
   </style>
 </head>
@@ -50,9 +52,10 @@
       <div class="brand-copy">
         <div class="eyebrow">Radar Socioambiental de México</div>
         <h1 class="brand-title">RASOME</h1>
-        <p class="brand-sub">Mapa interactivo de megaproyectos, conflictos y problemáticas socioambientales</p>
+        <p class="brand-sub">Megaproyectos, conflictos y problemáticas socioambientales</p>
       </div>
       <div class="header-actions">
+        <button class="ghost-btn credits-trigger" type="button" onclick="abrirCreditos()">Créditos</button>
         <button class="ghost-btn" type="button" onclick="toggleLegend()">Leyenda</button>
         <button class="primary-btn" type="button" onclick="descargarMapa()">Descargar mapa</button>
       </div>
@@ -118,6 +121,30 @@
       </header>
       <div id="detailBody" class="detail-body"></div>
     </article>
+  </div>
+  <div id="creditsModal" role="dialog" aria-modal="true" aria-labelledby="creditsTitle">
+    <section class="credits-panel">
+      <header class="credits-top">
+        <div class="detail-kicker">Instituciones y equipo</div>
+        <h2 id="creditsTitle">Créditos</h2>
+        <p>Territorios en Tensión · Atlas socioambiental de México</p>
+        <button id="creditsClose" class="detail-close" type="button" aria-label="Cerrar créditos">×</button>
+      </header>
+      <div class="credits-content">
+        <div class="logo-links" aria-label="Instituciones participantes">
+          <a class="logo-link" href="https://ciesas.edu.mx/" target="_blank" rel="noopener" title="Visitar CIESAS"><img src="logo-ciesas.png" alt="CIESAS" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="logo-fallback">CIESAS</span></a>
+          <a class="logo-link" href="https://prosigcsh.ciesas.edu.mx/" target="_blank" rel="noopener" title="Visitar ProSIG-CSH"><img src="logotipo-prosig-csh.png" alt="ProSIG-CSH" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="logo-fallback">ProSIG-CSH</span></a>
+          <a class="logo-link" href="https://opirna.ciesas.edu.mx/" target="_blank" rel="noopener" title="Visitar OPIRNA"><img src="logotipo-opirna.png" alt="OPIRNA" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="logo-fallback">OPIRNA</span></a>
+        </div>
+        <div class="credit-list">
+          <div class="credit-item"><div class="credit-role">Jefatura de proyecto</div><div class="credit-names"><strong>Carlos Alfredo Hernández Guillén</strong></div></div>
+          <div class="credit-item"><div class="credit-role">Búsqueda y sistematización de información</div><div class="credit-names">Uriel Valencia<br>José Antonio Bernal<br>Vanesa Jaimes</div></div>
+          <div class="credit-item"><div class="credit-role">Curaduría y estructuración de información</div><div class="credit-names">Uriel Valencia<br>José Antonio Bernal<br>Vanesa Jaimes</div></div>
+          <div class="credit-item"><div class="credit-role">Desarrollo del geoportal</div><div class="credit-names"><strong>Carlos Alfredo Hernández Guillén</strong></div></div>
+        </div>
+        <a class="institution-link" href="https://opirna.ciesas.edu.mx/" target="_blank" rel="noopener">Visitar el sitio de OPIRNA ↗</a>
+      </div>
+    </section>
   </div>
   <div id="toast" role="status" aria-live="polite"></div>
 
@@ -401,7 +428,11 @@
     function cerrarFicha(){document.getElementById('detailModal').classList.remove('open');document.body.style.overflow='';}
     document.getElementById('detailClose').addEventListener('click',cerrarFicha);
     document.getElementById('detailModal').addEventListener('click',e=>{if(e.target.id==='detailModal')cerrarFicha();});
-    document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarFicha();});
+    function abrirCreditos(){document.getElementById('creditsModal').classList.add('open');document.body.style.overflow='hidden';document.getElementById('creditsClose').focus();}
+    function cerrarCreditos(){document.getElementById('creditsModal').classList.remove('open');document.body.style.overflow='';}
+    document.getElementById('creditsClose').addEventListener('click',cerrarCreditos);
+    document.getElementById('creditsModal').addEventListener('click',e=>{if(e.target.id==='creditsModal')cerrarCreditos();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape'){cerrarFicha();cerrarCreditos();}});
     function toggleLegend(){const el=document.getElementById('legend');el.style.display=el.style.display==='none'?'block':'none';}
 
     // ---------- Exportar a PDF ----------
