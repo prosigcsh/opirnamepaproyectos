@@ -2,49 +2,96 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <title>Dashboard de Megaproyectos</title>
+  <title>RASOME · Radar Socioambiental de México</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <style>
-    :root{
-      --bg:#ffffff; --ink:#1f2937; --muted:#6b7280; --brand:#2c3e50;
-      --card:#f8fafc; --shadow:0 2px 10px rgba(0,0,0,.08);
-    }
-    body{font-family:Arial, sans-serif; margin:0; color:var(--ink); background:var(--bg);}
-    #header{background:var(--brand); color:#fff; padding:16px 12px; text-align:center; font-size:20px; font-weight:bold;}
-    #controls{margin:10px; text-align:center;}
-    #controls select{margin:0 6px 6px; padding:6px 8px; border:1px solid #e5e7eb; border-radius:8px; background:#fff;}
-    #controls button{padding:8px 14px; background:var(--brand); color:#fff; border:none; cursor:pointer; border-radius:8px; box-shadow:var(--shadow);}
-    #map{height:70vh;}
-    #legend{
-      background:#fff; padding:10px; font-size:12px; line-height:1.5em; border-radius:8px;
-      box-shadow:var(--shadow); position:absolute; bottom:98px; left:10px; z-index:1000; max-width:280px;
-    }
-    .legend-item{margin-bottom:6px; display:flex; align-items:center; gap:6px;}
-    .legend-swatch{width:18px; height:18px; display:inline-flex; align-items:center; justify-content:center;}
-    #footer{font-size:12px; background:#f4f4f4; padding:12px; text-align:center; border-top:1px solid #e5e7eb;}
-    #footer img{height:40px; vertical-align:middle; margin:0 10px;}
-    #footer a{color:#0b63c8; text-decoration:none;}
-    #notaLegal{font-size:10px; text-align:right; margin:10px 20px; color:#444;}
-    .popup-mini{font-size:13px; line-height:1.35;}
-    .popup-mini .name{font-weight:bold; display:block; margin-bottom:4px;}
-    .popup-mini .tipo{color:var(--muted); margin-bottom:6px; display:block;}
-    .popup-mini a{color:#0b63c8; text-decoration:none; font-weight:bold;}
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,600&display=swap');
+    :root{--ink:#15211d;--muted:#66716c;--forest:#173f35;--forest2:#24594b;--lime:#d5f36a;--paper:#f4f1e8;--card:#fffdf7;--line:#d9ddd6;--danger:#d35f3d;--shadow:0 20px 55px rgba(19,40,33,.14);}
+    *{box-sizing:border-box} html,body{height:100%} body{margin:0;font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--paper);overflow:hidden}
+    button,input,select{font:inherit} button:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid rgba(213,243,106,.65);outline-offset:2px}
+    #plantillaPDF{height:100%;display:grid;grid-template-rows:auto 1fr}
+    #header{display:flex;align-items:center;gap:18px;min-height:84px;padding:14px 24px;background:var(--forest);color:white;border-bottom:1px solid rgba(255,255,255,.1)}
+    .brand-mark{display:grid;place-items:center;width:48px;height:48px;border-radius:50%;background:var(--lime);color:var(--forest);font-family:'Newsreader',serif;font-size:25px}
+    .brand-copy{min-width:0}.eyebrow{text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:700;color:var(--lime)}
+    .brand-title{margin:2px 0 0;font-family:'Newsreader',serif;font-size:clamp(24px,3vw,38px);line-height:1}.brand-sub{margin:5px 0 0;color:#bdd0c9;font-size:12px}
+    .header-actions{margin-left:auto;display:flex;gap:8px}.icon-btn,.primary-btn,.ghost-btn{border:0;border-radius:11px;cursor:pointer;font-weight:700;transition:.18s ease}
+    .icon-btn,.ghost-btn{padding:10px 13px;background:rgba(255,255,255,.09);color:white;border:1px solid rgba(255,255,255,.14)}.icon-btn:hover,.ghost-btn:hover{background:rgba(255,255,255,.16)}
+    .primary-btn{padding:11px 16px;background:var(--lime);color:var(--forest)}.primary-btn:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(213,243,106,.2)}
+    .workspace{min-height:0;display:grid;grid-template-columns:380px 1fr;position:relative}
+    #sidebar{min-height:0;display:flex;flex-direction:column;background:var(--card);border-right:1px solid var(--line);z-index:700;box-shadow:8px 0 30px rgba(21,33,29,.06)}
+    #controls{padding:18px 18px 12px;border-bottom:1px solid var(--line)}
+    .search-wrap{position:relative}.search-icon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted)}
+    #searchInput{width:100%;height:46px;padding:0 42px;border:1px solid #cfd5ce;border-radius:13px;background:white;color:var(--ink);box-shadow:0 4px 14px rgba(21,33,29,.05)}#searchInput::placeholder{color:#909994}
+    #clearSearch{position:absolute;right:8px;top:7px;width:32px;height:32px;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;font-size:18px}#clearSearch:hover{background:#eef1ec}
+    .filter-label{display:block;margin:15px 0 6px;color:var(--muted);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
+    .filter-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.filter-grid select{width:100%;height:40px;padding:0 10px;border:1px solid #d7dbd5;border-radius:10px;background:#f9faf7;color:var(--ink)}
+    #nombreSelect{display:none}.filter-actions{display:flex;align-items:center;justify-content:space-between;margin-top:10px}.text-btn{padding:4px;border:0;background:transparent;color:var(--forest2);font-weight:700;cursor:pointer}.text-btn:hover{text-decoration:underline}
+    #resultCount{font-size:12px;color:var(--muted)}
+    .summary{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:15px}.stat{padding:9px 7px;border-radius:10px;background:#edf1eb}.stat strong{display:block;font-family:'Newsreader',serif;font-size:20px;color:var(--forest)}.stat span{display:block;font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+    #results{flex:1;min-height:0;overflow:auto;padding:10px}.result-card{width:100%;display:block;text-align:left;padding:13px 12px;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--ink);cursor:pointer}.result-card:hover,.result-card.is-active{background:#f0f3ed;border-color:#dce2da}.result-top{display:flex;align-items:flex-start;gap:10px}.result-dot{flex:0 0 auto;width:11px;height:11px;margin-top:4px;border-radius:50%;box-shadow:0 0 0 3px white,0 0 0 4px #d7dcd6}.result-name{font-weight:700;line-height:1.25}.result-meta{margin:5px 0 0 21px;color:var(--muted);font-size:11px}.empty{padding:30px 18px;text-align:center;color:var(--muted);font-size:13px;line-height:1.5}
+    .map-shell{position:relative;min-width:0;min-height:0}#map{position:absolute;inset:0;background:#dfe5df}
+    .map-intro{position:absolute;top:18px;right:18px;z-index:500;width:min(430px,calc(100% - 110px));padding:14px 16px;border:1px solid rgba(255,255,255,.7);border-radius:14px;background:rgba(255,253,247,.91);backdrop-filter:blur(14px);box-shadow:var(--shadow)}.map-intro strong{display:block;font-family:'Newsreader',serif;font-size:19px}.map-intro span{display:block;margin-top:3px;color:var(--muted);font-size:11px;line-height:1.4}
+    #legend{position:absolute;left:auto;right:14px;bottom:24px;z-index:500;width:245px;max-height:46vh;overflow:auto;padding:12px 13px;border:1px solid rgba(255,255,255,.8);border-radius:14px;background:rgba(255,253,247,.94);box-shadow:var(--shadow);font-size:10px;backdrop-filter:blur(14px)}#legend>strong{display:block;margin-bottom:9px;font-size:11px;text-transform:uppercase;letter-spacing:.1em}.legend-item{margin:5px 0;display:flex;align-items:center;gap:7px;color:#49534f}.legend-swatch{width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto}
+    #footer,#notaLegal{display:none}.leaflet-control-zoom a,.leaflet-control-layers{border-color:#d6dbd4!important;box-shadow:0 8px 22px rgba(21,33,29,.12)!important}.leaflet-popup-content-wrapper{border-radius:14px;box-shadow:var(--shadow)}.leaflet-popup-content{margin:16px}.popup-mini{min-width:220px;font-size:12px}.popup-mini .name{display:block;font-family:'Newsreader',serif;font-size:18px;line-height:1.15}.popup-mini .tipo{display:block;margin:6px 0 11px;color:var(--muted)}.popup-mini a{display:inline-block;padding:8px 11px;border-radius:9px;background:var(--forest);color:white;text-decoration:none;font-weight:700}
+    #detailModal{position:fixed;inset:0;z-index:3000;display:none;align-items:center;justify-content:flex-end;background:rgba(8,20,16,.48);backdrop-filter:blur(4px)}#detailModal.open{display:flex}.detail-panel{width:min(610px,100%);height:100%;display:flex;flex-direction:column;background:var(--card);box-shadow:-25px 0 70px rgba(8,20,16,.25);animation:slideIn .25s ease}.detail-head{padding:26px 28px 20px;background:var(--forest);color:white}.detail-kicker{color:var(--lime);font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:700}.detail-head h2{margin:8px 45px 6px 0;font-family:'Newsreader',serif;font-size:32px;line-height:1.05}.detail-sub{color:#bdd0c9;font-size:13px}.detail-close{position:absolute;top:20px;right:20px;width:38px;height:38px;border:1px solid rgba(255,255,255,.2);border-radius:10px;background:rgba(255,255,255,.1);color:white;font-size:22px;cursor:pointer}.detail-body{overflow:auto;padding:20px 28px 34px}.detail-row{display:grid;grid-template-columns:160px 1fr;gap:18px;padding:12px 0;border-bottom:1px solid var(--line)}.detail-key{color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.05em}.detail-value{font-size:13px;line-height:1.5;overflow-wrap:anywhere}.detail-value a{color:var(--forest2);font-weight:700}
+    #toast{position:fixed;left:50%;bottom:24px;z-index:4000;transform:translate(-50%,20px);padding:11px 16px;border-radius:10px;background:#17241f;color:white;font-size:12px;opacity:0;pointer-events:none;transition:.2s}#toast.show{opacity:1;transform:translate(-50%,0)}
+    .loading-state{position:absolute;inset:0;z-index:800;display:grid;place-items:center;background:rgba(244,241,232,.83);backdrop-filter:blur(3px)}.loading-card{text-align:center;padding:22px 28px;border-radius:16px;background:white;box-shadow:var(--shadow)}.pulse{width:32px;height:32px;margin:0 auto 12px;border-radius:50%;background:var(--lime);animation:pulse 1.2s infinite}.loading-card small{color:var(--muted)}
+    @keyframes pulse{50%{transform:scale(.68);opacity:.5}}@keyframes slideIn{from{transform:translateX(30px);opacity:.5}}
+    @media(max-width:840px){body{overflow:auto}#plantillaPDF{height:auto;min-height:100vh}.workspace{grid-template-columns:1fr;grid-template-rows:auto 64vh}#sidebar{max-height:46vh}.brand-sub{display:none}.header-actions .ghost-btn{display:none}.map-intro{top:10px;right:10px;width:calc(100% - 70px);padding:11px 13px}.map-intro strong{font-size:17px}#legend{display:none}.detail-row{grid-template-columns:1fr;gap:4px}.summary{display:none}}
+    @media(max-width:540px){#header{padding:12px 14px}.brand-mark{width:40px;height:40px}.brand-title{font-size:22px}.header-actions{gap:5px}.primary-btn{padding:9px 11px;font-size:11px}.workspace{grid-template-rows:auto 58vh}.filter-grid{grid-template-columns:1fr}.detail-head,.detail-body{padding-left:20px;padding-right:20px}.detail-head h2{font-size:27px}}
+    @media print{body{overflow:visible}.workspace{grid-template-columns:1fr}#sidebar,.header-actions,.map-intro{display:none}.map-shell,#map{position:relative;height:70vh}#footer{display:block}}
   </style>
 </head>
 <body>
   <div id="plantillaPDF">
-    <div id="header">Megaproyectos y problemáticas socioambientales en México</div>
+    <header id="header">
+      <div class="brand-mark" aria-hidden="true">T</div>
+      <div class="brand-copy">
+        <div class="eyebrow">Radar Socioambiental de México</div>
+        <h1 class="brand-title">RASOME</h1>
+        <p class="brand-sub">Mapa interactivo de megaproyectos, conflictos y problemáticas socioambientales</p>
+      </div>
+      <div class="header-actions">
+        <button class="ghost-btn" type="button" onclick="toggleLegend()">Leyenda</button>
+        <button class="primary-btn" type="button" onclick="descargarMapa()">Descargar mapa</button>
+      </div>
+    </header>
 
-    <div id="controls">
-      <select id="nombreSelect"><option value="">--Nombre--</option></select>
-      <select id="tipoSelect"><option value="">--Tipo--</option></select>
-      <select id="estadoSelect"><option value="">--Estado--</option></select>
-      <button onclick="descargarMapa()">Descargar mapa en PDF</button>
+    <main class="workspace">
+      <aside id="sidebar" aria-label="Explorador de casos">
+        <div id="controls">
+          <div class="search-wrap">
+            <span class="search-icon" aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" placeholder="Buscar proyecto, estado o palabra clave…" autocomplete="off" aria-label="Buscar casos">
+            <button id="clearSearch" type="button" aria-label="Limpiar búsqueda">×</button>
+          </div>
+          <span class="filter-label">Filtrar el atlas</span>
+          <div class="filter-grid">
+            <select id="nombreSelect" aria-label="Nombre"><option value="">Todos los nombres</option></select>
+            <select id="tipoSelect" aria-label="Tipo"><option value="">Todos los tipos</option></select>
+            <select id="estadoSelect" aria-label="Estado"><option value="">Todos los estados</option></select>
+          </div>
+          <div class="filter-actions">
+            <span id="resultCount">Preparando casos…</span>
+            <button id="clearFilters" class="text-btn" type="button">Limpiar filtros</button>
+          </div>
+          <div class="summary" aria-label="Resumen del atlas">
+            <div class="stat"><strong id="statCases">—</strong><span>casos</span></div>
+            <div class="stat"><strong id="statStates">—</strong><span>estados</span></div>
+            <div class="stat"><strong id="statTypes">—</strong><span>tipos</span></div>
+          </div>
+        </div>
+        <div id="results" aria-live="polite"></div>
+      </aside>
+      <section class="map-shell" aria-label="Mapa interactivo">
+        <div id="map"></div>
+        <div class="map-intro"><strong>Explora el territorio</strong><span>Selecciona un punto o abre un caso de la lista para consultar su ficha documental.</span></div>
+        <div id="legend"></div>
+        <div id="loadingState" class="loading-state"><div class="loading-card"><div class="pulse"></div><strong>Cargando el atlas</strong><br><small>Organizando casos y territorios…</small></div></div>
+      </section>
+    </main>
     </div>
-
-    <div id="map"></div>
-    <div id="legend"></div>
 
     <div id="footer">
       <img src="logo-ciesas.png" alt="Logo CIESAS">
@@ -60,6 +107,19 @@
       El uso de este material con fines académicos, educativos o informativos está permitido citando la fuente.
     </div>
   </div>
+
+  <div id="detailModal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+    <article class="detail-panel">
+      <header class="detail-head">
+        <div class="detail-kicker">Ficha territorial</div>
+        <h2 id="detailTitle">Caso</h2>
+        <div id="detailSubtitle" class="detail-sub"></div>
+        <button id="detailClose" class="detail-close" type="button" aria-label="Cerrar ficha">×</button>
+      </header>
+      <div id="detailBody" class="detail-body"></div>
+    </article>
+  </div>
+  <div id="toast" role="status" aria-live="polite"></div>
 
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -169,7 +229,10 @@
     }
 
     const legend = document.getElementById('legend');
-    let proyectoLayer, proyectos = [];
+    let proyectoLayer, proyectos = [], filteredProjects = [], activeFeature = null;
+    const esc = (v) => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    const normalize = (v) => String(v ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+    function toast(message){ const el=document.getElementById('toast'); el.textContent=message; el.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>el.classList.remove('show'),2600); }
 
     // ---------- CARGA DEL GEOJSON ----------
     fetch('megaproyectos2.geojson')
@@ -194,9 +257,18 @@
         [...estados].sort().forEach(v => addOption('estadoSelect', v));
 
         generarLeyenda(ordenTipos.filter(t => tipos.has(t)));
+        document.getElementById('statCases').textContent = proyectos.length;
+        document.getElementById('statStates').textContent = estados.size;
+        document.getElementById('statTypes').textContent = tipos.size;
+        document.getElementById('loadingState').style.display = 'none';
         mostrarProyectos(proyectos);
       })
-      .catch(err => console.error('Error al cargar el GeoJSON:', err));
+      .catch(err => {
+        console.error('Error al cargar el GeoJSON:', err);
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('results').innerHTML = '<div class="empty"><strong>No fue posible cargar los casos.</strong><br>Coloca <code>megaproyectos2.geojson</code> junto a este archivo y ábrelo desde un servidor web.</div>';
+        document.getElementById('resultCount').textContent = 'Datos no disponibles';
+      });
 
     // ---------- UI ----------
     function addOption(selectId, value){
@@ -221,14 +293,34 @@
     function popupMinimo(p, tipoN){
       return `
         <div class="popup-mini">
-          <span class="name">${p.Nombre || 'Sin nombre'}</span>
-          <span class="tipo">Tipo: ${tipoN || 'N/D'}</span>
-          <a href="#" class="ver-meta">Ver metadatos</a>
+          <span class="name">${esc(p.Nombre || 'Sin nombre')}</span>
+          <span class="tipo">${esc(tipoN || 'Tipo no disponible')}${p.Estado ? ' · '+esc(p.Estado) : ''}</span>
+          <a href="#" class="ver-meta">Abrir ficha completa</a>
         </div>`;
+    }
+
+    function renderResults(lista){
+      const results = document.getElementById('results');
+      document.getElementById('resultCount').textContent = `${lista.length} ${lista.length===1?'caso':'casos'} visibles`;
+      if(!lista.length){ results.innerHTML='<div class="empty"><strong>No encontramos coincidencias.</strong><br>Prueba otra palabra o limpia los filtros.</div>'; return; }
+      results.innerHTML = lista.slice(0,250).map((f,i)=>{
+        const p=f.properties||{}, tipo=f._tipoNorm||p.Tipo||'Sin clasificación';
+        return `<button class="result-card" type="button" data-result="${i}"><span class="result-top"><span class="result-dot" style="background:${colorPorTipo[tipo]||'#d9ded8'}"></span><span class="result-name">${esc(p.Nombre||'Caso sin nombre')}</span></span><span class="result-meta">${esc(tipo)}${p.Estado?' · '+esc(p.Estado):''}</span></button>`;
+      }).join('');
+      results.querySelectorAll('[data-result]').forEach(btn=>btn.addEventListener('click',()=>focusFeature(lista[Number(btn.dataset.result)])));
+    }
+
+    function focusFeature(feature){
+      activeFeature=feature;
+      const coords=feature.geometry?.coordinates;
+      if(coords?.length>=2) map.flyTo([Number(coords[1]),Number(coords[0])], Math.max(map.getZoom(),8), {duration:.8});
+      const layer=proyectoLayer?.getLayers().find(l=>l.feature===feature); if(layer) layer.openPopup();
+      setTimeout(()=>abrirMetadatos(feature.properties||{},feature._tipoNorm||feature.properties?.Tipo||''),280);
     }
 
     function mostrarProyectos(lista){
       if(proyectoLayer) proyectoLayer.remove();
+      filteredProjects = lista;
 
       proyectoLayer = L.geoJSON(lista, {
         pointToLayer: (feature, latlng) => {
@@ -260,6 +352,8 @@
         }
       }).addTo(map);
 
+      renderResults(lista);
+
       if(lista.length && proyectoLayer.getLayers().length){
         map.fitBounds(proyectoLayer.getBounds().pad(0.1));
       }
@@ -269,64 +363,46 @@
       const nombre = document.getElementById('nombreSelect').value;
       const tipo = document.getElementById('tipoSelect').value;
       const estado = document.getElementById('estadoSelect').value;
+      const query = normalize(document.getElementById('searchInput').value);
 
       const filtrados = proyectos.filter(f => {
         const p = f.properties || {};
         return (!nombre || p.Nombre === nombre) &&
                (!tipo || f._tipoNorm === tipo) &&
-               (!estado || p.Estado === estado);
+               (!estado || p.Estado === estado) &&
+               (!query || normalize(Object.values(p).join(' ')).includes(query));
       });
       mostrarProyectos(filtrados);
     }
     document.getElementById('nombreSelect').addEventListener('change', filtrarProyectos);
     document.getElementById('tipoSelect').addEventListener('change', filtrarProyectos);
     document.getElementById('estadoSelect').addEventListener('change', filtrarProyectos);
+    document.getElementById('searchInput').addEventListener('input', filtrarProyectos);
+    document.getElementById('clearSearch').addEventListener('click',()=>{document.getElementById('searchInput').value='';filtrarProyectos();document.getElementById('searchInput').focus();});
+    document.getElementById('clearFilters').addEventListener('click',()=>{
+      document.getElementById('searchInput').value=''; document.getElementById('tipoSelect').value=''; document.getElementById('estadoSelect').value=''; filtrarProyectos(); toast('Filtros restablecidos');
+    });
 
-    // ---------- METADATOS (nueva pestaña) ----------
+    // ---------- FICHA INTEGRADA ----------
     function abrirMetadatos(p, tipoN){
-      const safe = (v)=> (v===null||v===undefined||v==="") ? "—" : String(v);
       const entries = Object.keys(p).sort().map(k => {
         const v = p[k];
         const val = (typeof v === 'string' && /^https?:\/\//i.test(v))
-          ? `<a href="${v}" target="_blank" rel="noopener">${v}</a>` : safe(v);
-        return `<div class="row"><div class="k">${k}</div><div class="v">${val}</div></div>`;
+          ? `<a href="${esc(v)}" target="_blank" rel="noopener">Consultar fuente ↗</a>` : esc((v===null||v===undefined||v==='')?'—':v);
+        return `<div class="detail-row"><div class="detail-key">${esc(k)}</div><div class="detail-value">${val}</div></div>`;
       }).join("");
-
-      const html = `
-      <html lang="es">
-        <head>
-          <meta charset="utf-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Metadatos · ${safe(p.Nombre)}</title>
-          <style>
-            :root{--bg:#f8fafc;--card:#fff;--ink:#0f172a;--muted:#475569;--brand:#2c3e50;}
-            body{margin:0;font-family:Arial,sans-serif;background:var(--bg);color:var(--ink);}
-            header{background:var(--brand);color:#fff;padding:14px 16px;font-weight:bold;}
-            main{max-width:900px;margin:24px auto;padding:0 12px;}
-            .card{background:var(--card);border-radius:14px;box-shadow:0 5px 20px rgba(0,0,0,.1);padding:18px;}
-            .title{font-size:20px;margin:0 0 6px;}
-            .subtitle{color:var(--muted);margin:0 0 16px;}
-            .row{display:grid;grid-template-columns:220px 1fr;gap:10px;padding:10px 0;border-bottom:1px solid #e5e7eb;}
-            .k{font-weight:bold;color:#374151;}
-            .v a{color:#0b63c8;text-decoration:none;word-break:break-all;}
-            footer{font-size:12px;color:#64748b;text-align:center;margin:18px 0;}
-          </style>
-        </head>
-        <body>
-          <header>Metadatos del proyecto</header>
-          <main>
-            <div class="card">
-              <h1 class="title">${safe(p.Nombre)}</h1>
-              <p class="subtitle">Tipo: <strong>${safe(tipoN)}</strong>${p.Estado ? " · Estado: "+safe(p.Estado) : ""}</p>
-              ${entries}
-            </div>
-            <footer>Fuente: OPIRNA · ProSIG-CSH · CIESAS</footer>
-          </main>
-        </body>
-      </html>`;
-      const w = window.open('', '_blank');
-      w.document.open(); w.document.write(html); w.document.close();
+      document.getElementById('detailTitle').textContent=p.Nombre||'Caso sin nombre';
+      document.getElementById('detailSubtitle').textContent=`${tipoN||'Tipo no disponible'}${p.Estado?' · '+p.Estado:''}`;
+      document.getElementById('detailBody').innerHTML=entries;
+      document.getElementById('detailModal').classList.add('open');
+      document.body.style.overflow='hidden';
     }
+
+    function cerrarFicha(){document.getElementById('detailModal').classList.remove('open');document.body.style.overflow='';}
+    document.getElementById('detailClose').addEventListener('click',cerrarFicha);
+    document.getElementById('detailModal').addEventListener('click',e=>{if(e.target.id==='detailModal')cerrarFicha();});
+    document.addEventListener('keydown',e=>{if(e.key==='Escape')cerrarFicha();});
+    function toggleLegend(){const el=document.getElementById('legend');el.style.display=el.style.display==='none'?'block':'none';}
 
     // ---------- Exportar a PDF ----------
     function descargarMapa(){
